@@ -24,21 +24,24 @@ install:
   - if [ $TRAVIS_OS_NAME = linux ]; then QLIBDIR=l64; elif [ $TRAVIS_OS_NAME = osx ]; then QLIBDIR=m64; else echo "unknown OS ('$TRAVIS_OS_NAME')" >&2; exit 1; fi; export QLIBDIR
   - conda install -c kx kdb # grab kdb+ with conda
   - cp -r $(conda info --base)/q q && export QHOME=$(pwd)/q && export PATH=$QHOME/$QLIBDIR:$PATH
-  - echo -n $QLIC_KC |base64 --decode > q/kc.lic
   # grab latest embedpy
-  - mkdir embedpy && cd embedpy
-  - echo 'getembedpy"latest"' | q ../build/getembedpy.q -q
-  - cd ..
-  - echo 'p)print("python works")' | q -q
-  - pip install -r requirements.txt
+  - if [[ "x$QLIC_KC" != "x" ]]; then
+      echo -n $QLIC_KC |base64 --decode > q/kc.lic;
+      mkdir embedpy && cd embedpy && echo 'getembedpy"latest"' | q ../build/getembedpy.q -q && cd ..;
+      pip install -r requirements.txt;
+    fi
 
 script:
 - make -f build/makefile jupyterq
 - echo "Preparing version $TRAVIS_BRANCH-$TRAVIS_COMMIT"
 - tar czf jupyterq_$TRAVIS_OS_NAME-$TRAVIS_BRANCH.tgz jupyterq*.q install.sh README.md LICENSE kxpy kernelspec examples kdb+Notebooks.ipynb [ml]64/jupyterq.so
 - echo "Packaged as jupyterq_$TRAVIS_OS_NAME-$TRAVIS_BRANCH.tgz"
-  # can't test install.sh without q so use make install
-- make -f build/makefile install
+# install and test
+- if [[ "x$QLIC_KC" != " x]]; then
+    ./install.sh;
+    tests/test.sh;
+  fi
+
 deploy:
   provider: releases
   api_key: "$GITHUB_APIKEY"
