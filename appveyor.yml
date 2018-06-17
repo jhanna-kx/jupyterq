@@ -1,20 +1,19 @@
 version: 1.0.{build}
 image:
 - Visual Studio 2017
+clone_depth: 1
+
 artifacts:
 - path: jupyterq_windows-$(appveyor_repo_tag_name).zip
 skip_non_tags: false
 platform: x64
+
 build_script:
 - cmd: >-
-    
-    dir C:\Miniconda3\Scripts
 
-    set PATH=C:\Miniconda\3;C:\Miniconda3\Scripts;%PATH%
+    build\buildscript.bat
 
-    build\compile.bat
-
-    pip install -r requirements.txt
+    tests\test.bat
 
 after_build:
 - cmd: >-
