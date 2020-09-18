@@ -27,10 +27,11 @@ p)def< findkw(soup,kw):
     title=link.get_text()
  return okw,title,href
 bs:.p.import[`bs4;`:BeautifulSoup;>]
-refcard:@[req:{"c"$.p.import[`urllib.request][`:urlopen][x][`:read][]`};(hb:"https://code.kx.com/v2/"),"ref";{0}];
-offline:0~refcard; 
-if[not offline;findkw:findkw[bs[refcard;`html.parser];]];
-find:{$[offline&kw:(x:`$sstring x)in qkw;"Sorry no help is available, as the kernel did not have access to code.kx.com when it was started";kw;findkw x;0]}
+find:{$[offline&kw:(x:`$sstring x)in qkw;"Sorry no help is available, as the kernel could not connect to code.kx.com";kw;findkw x;0]}
+find:{[f;x]
+ refcard:@[req:{"c"$.p.import[`urllib.request][`:urlopen][x][`:read][]`};(hb::"https://code.kx.com/v2/"),"ref";{0}];
+ if[not offline::0~refcard;findkw::findkw[bs[refcard;`html.parser];]];
+ (find::f)x}find
 
 sstring:{$[10=type x;;string]x}
 / currently jupyter only supports text/plain tooltips, html content is only shown in pager (SHIFT+TAB 4 times)
